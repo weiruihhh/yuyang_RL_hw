@@ -37,7 +37,25 @@ def get_args():
         type=int,
         default=10,
         help='save interval, one eval per n updates (default: None)')
-    args = parser.parse_args()
+    
+    ##new add
+    parser.add_argument(
+        '--gamma',
+        type=float,
+        default=0.95,
+        help='折扣率')
 
+    parser.add_argument(
+        '--lr',
+        type=float,
+        default=0.1,
+        help='学习率')
+
+    parser.add_argument(
+        '--decay_epsilon',
+        type=float,
+        default=0.1,
+        help='epsilon衰减率')
+    args = parser.parse_args()
 
     return args

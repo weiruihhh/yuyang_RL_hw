@@ -1,9 +1,9 @@
 import numpy as np
-
+import math
 from abc import abstractmethod
 
 class QAgent:
-	def __init__(self,state_shape, action_shape,discount_factor=0.99,learing_rate=0.1,epsilon=1,decay_epsilon=0.1):
+	def __init__(self,state_shape, action_shape,grid_num,discount_factor=0.99,learing_rate=0.1,epsilon=1,decay_epsilon=0.1):
 		"""
         初始化 QAgent 类，设置 Q 表的维度和各种超参数。
         
@@ -19,8 +19,10 @@ class QAgent:
 		self.state_shape = state_shape
 		self.action_shape = action_shape
 		self.gamma = discount_factor
+		self.grid_num = grid_num
 
-		self.Q = np.zeros((state_shape, action_shape))#定义Q表
+		self.Q = np.zeros((grid_num,grid_num,action_shape))
+		# self.Q = np.zeros(())#定义Q表
 		
 		self.lr = learing_rate
 
@@ -37,11 +39,12 @@ class QAgent:
         返回:
             action: 选择的动作
         """
+		x, y = map(int, ob)
 		# epsilon-greedy 策略：以 epsilon 的概率随机选择动作，1-epsilon 的概率选择最大 Q 值的动作
 		if np.random.rand() < self.epsilon:
-			return np.random.randint(self.action_shape)
+			return np.random.randint(0,self.action_shape)
 		else:
-			return np.argmax(self.Q[ob])
+			return np.argmax(self.Q[x,y])
 
 	def update(self, ob, action, reward, ob_next, done):
 		"""
@@ -55,12 +58,16 @@ class QAgent:
 			done: 是否结束
         """
 		#计算公式: Q(s,a) = Q(s,a) + lr * (r + gamma * max(Q(s',a')) - Q(s,a))
-		if done: return
-		max_next_q = np.max(self.Q[ob_next])
-		target = reward + self.gamma * max_next_q
-		self.Q[ob, action] += self.lr * (target - self.Q[ob, action])
-	def epsilon_decay(self):
+		x, y = map(int, ob_next)
+		if done: 
+			self.Q[x,y] = reward
+			return
+		else:
+			max_next_q = np.max(self.Q[x,y])
+			target = reward + self.gamma * max_next_q
+			self.Q[x,y,action] += self.lr * (target - self.Q[x,y,action])
+	def epsilon_decay(self,num):
 		"""
 		衰减epsilon值
 		"""
-		self.epsilon = max(self.epsilon * self.decay_epsilon, self.decay_epsilon_min)
+		self.epsilon = self.decay_epsilon_min + (self.epsilon-self.decay_epsilon_min) * math.exp(-1 * 10^-5 *num)

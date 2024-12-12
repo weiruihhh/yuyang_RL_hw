@@ -19,13 +19,13 @@ def plot(record):
 	ax.set_xlabel('number of steps')
 	ax.set_ylabel('Average score per episode')
 	ax1 = ax.twinx()
-	ax1.plot(record['steps'], record['query'],
-	         color='red', label='query')
-	ax1.set_ylabel('queries')
+	# ax1.plot(record['steps'], record['query'],
+	#          color='red', label='query')
+	# ax1.set_ylabel('queries')
 	reward_patch = mpatches.Patch(lw=1, linestyle='-', color='blue', label='score')
-	query_patch = mpatches.Patch(lw=1, linestyle='-', color='red', label='query')
-	patch_set = [reward_patch, query_patch]
-	ax.legend(handles=patch_set)
+	# query_patch = mpatches.Patch(lw=1, linestyle='-', color='red', label='query')
+	# patch_set = [reward_patch, query_patch]
+	# ax.legend(handles=patch_set)
 	fig.savefig('performance.png')
 
 class Env(object):
@@ -70,7 +70,7 @@ def main():
 	# you should finish your agent with QAgent
 	# e.g. agent = myQAgent()
 	# agent = QAgent()
-	agent = QAgent(state_shape=observation_shape, action_shape=action_shape, discount_factor=args.gamma, learing_rate=args.lr, decay_epsilon=args.decay_epsilon)
+	agent = QAgent(state_shape=observation_shape, action_shape=action_shape,grid_num=envs.grid_num, discount_factor=args.gamma, learing_rate=args.lr, decay_epsilon=args.decay_epsilon)
 
 
 	# start to train your agent
@@ -88,19 +88,29 @@ def main():
 			# interact with the environment
 			# obs_next, reward, done, info = envs.step(action)
 			# obs = obs_next
-			agent.select_action(obs)
-			obs_next,reward,done,info = envs.step(agent.select_action(obs))
-			agent.update(obs, agent.select_action(obs), reward, obs_next, done)
+			action = agent.select_action(obs)
+			obs_next,reward,done,info = envs.step(action)
+			agent.update(obs, action, reward, obs_next, done)
 			obs = obs_next
-			agent.epsilon_decay()
+			agent.epsilon_decay(step)
 
 			if done:
 				envs.reset()
 
 			# an example of saving observations
 			if args.save_img:
-				scipy.misc.toimage(info, cmin=0.0, cmax=1).save('imgs/example.jpeg')
+				# scipy.misc.toimage(info, cmin=0.0, cmax=1).save('imgs/example.jpeg')
+				# 假设 info 是一个 NumPy 数组，范围在 [0, 1] 之间
+				info = np.random.rand(100, 100, 3)  # 示例数据
+
+				# 将数据缩放到 [0, 255] 的范围
+				info_scaled = (info * 255).astype(np.uint8)
+
+				# 创建图像并保存
+				img = Image.fromarray(info_scaled)
+				img.save('imgs/example.jpeg')
 		# you should finish your Q-learning algorithm here
+		# agent.epsilon_decay(i)
 
 
 		if (i+1) % args.log_interval == 0:

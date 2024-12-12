@@ -191,4 +191,5 @@ class Make_Env(object):
 		reward, done, score = self.trans(action)
 		info = self.get_ob()
 		observ_next = self.get_state()
+		print(tuple(observ_next))
 		return observ_next, reward, done, info
